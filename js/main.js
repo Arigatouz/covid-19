@@ -64,7 +64,7 @@ searchInput.addEventListener('click', e => {
       d.countryInfo.iso2 === countryName.toUpperCase()
   );
   if (countryData) {
-    showData.innerHTML += `<tr>
+    showData.innerHTML = `<tr>
                                 <td><img style= width = '30px' ; height = '30px' src="${
                                   countryData.countryInfo.flag
                                 }"/></td>
@@ -87,7 +87,7 @@ searchInput.addEventListener('click', e => {
                                 <td>${countryData.recovered.toLocaleString(
                                   'en'
                                 )}</td>
-                            </tr>`;
+                            </tr>${showData.innerHTML}`;
   } else {
     failMessage.innerHTML = `Failed to find data for: ${countryName}`;
   }
