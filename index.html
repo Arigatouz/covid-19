@@ -13,20 +13,23 @@
     <h1> CoronaVirus Covid 19 </h1>
 
     <div class="form-group">
-        <label for="country" class='d-block'>Enter the country Name </label>
-        <input type="text" style="width: 300px;" class="form-control d-inline" name="country" id="" aria-describedby="helpId" placeholder="Country name!">
-        <button id="search" class="d-inline btn btn-success">Search</button>
+        <form action="">
+            <label for="country" class='d-block'>Enter the country Name </label>
+            <input type="text" style="width: 300px;" class="form-control d-inline" name="country" id="" aria-describedby="helpId" placeholder="Country name!">
+            <button id="search" class="d-inline btn btn-success">Search</button>
+        </form>
         <small id="helpId" class="form-text text-muted">These statistics might be not 100% accurate </small>
     </div>
     </div>
 
 
-    <h1 id='message'></h1>
+    <h1 class="text-danger" id='message'></h1>
     <h4 id='Date'>
     </h4>
     <table class="table table-hover table-dark">
         <thead>
             <tr>
+                <th scope="col"></th>
                 <th scope="col">County Name</th>
                 <th scope="col">TotalConfirmed</th>
                 <th scope="col">NewConfirmed</th>
@@ -36,10 +39,7 @@
                 <th scope="col">TotalRecovered</th>
             </tr>
         </thead>
-        <tbody>
-            <tr id="show__statistics">
-
-            </tr>
+        <tbody id="show__statistics">
         </tbody>
     </table>
     <script src="js/library/jquery.min.js"></script>
