@@ -22,6 +22,7 @@ function getData(force, cb) {
     fetch('https://corona.lmao.ninja/countries')
       .then(response => response.json())
       .then(data => {
+        covidData = data;
         localStorage.setItem('covidData', JSON.stringify(data));
         cb('covid data');
       });
@@ -30,6 +31,7 @@ function getData(force, cb) {
     fetch('https://api.covid19api.com/summary')
       .then(response => response.json())
       .then(data => {
+        covidSummary = data;
         localStorage.setItem('covidSummary', JSON.stringify(data));
         const date = data['Date'];
         const newDate = date.slice(0, 10);
@@ -50,6 +52,9 @@ refreshResultBtn.addEventListener('click', e => {
 
 searchInput.addEventListener('click', e => {
   e.preventDefault();
+  if (!covidData) {
+    failMessage.innerHTML = 'No data. Please try again.';
+  }
   failMessage.innerHTML = '';
   const countryName = countryInput.value;
 
