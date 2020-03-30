@@ -2,39 +2,56 @@ const countryInput = document.querySelector('.form-control'),
   showData = document.getElementById('show__statistics'),
   showDate = document.getElementById('Date'),
   failMessage = document.getElementById('message'),
-  searchInput = document.getElementById('search');
+  searchInput = document.getElementById('search'),
+  refreshResultBtn = document.getElementById('refreshResultBtn');
 
 var covidData = JSON.parse(localStorage.getItem('covidData'));
 var covidSummary = JSON.parse(localStorage.getItem('covidSummary'));
 
-window.onload = function() {
-  if (!covidData) {
+window.onload = getData(false, function(name) {
+  console.log(`got ${name}`);
+});
+
+function getData(force, cb) {
+  if (covidSummary) {
+    showDate.textContent = `The Date of this Statistics (${new Date(
+      covidSummary['Date']
+    ).toLocaleDateString()})`;
+  }
+  if (!covidData || force) {
     fetch('https://corona.lmao.ninja/countries')
       .then(response => response.json())
       .then(data => {
         localStorage.setItem('covidData', JSON.stringify(data));
+        cb('covid data');
       });
   }
-  if (!covidSummary) {
+  if (!covidSummary || force) {
     fetch('https://api.covid19api.com/summary')
       .then(response => response.json())
       .then(data => {
-        this.localStorage.setItem('covidSummary', JSON.stringify(data));
+        localStorage.setItem('covidSummary', JSON.stringify(data));
         const date = data['Date'];
         const newDate = date.slice(0, 10);
         showDate.textContent = `The Date of this Statistics (${newDate})`;
+        cb('covid summary');
       });
   }
-};
+}
+
+refreshResultBtn.addEventListener('click', e => {
+  getData(true, function(name) {
+    showDate.textContent = `Updated Date of this Statistics (${new Date(
+      covidSummary['Date']
+    ).toLocaleDateString()})`;
+    console.log('Got data for', name);
+  });
+});
 
 searchInput.addEventListener('click', e => {
   e.preventDefault();
   failMessage.innerHTML = '';
   const countryName = countryInput.value;
-
-  const date = covidSummary['Date'];
-  const newDate = date.slice(0, 10);
-  showDate.textContent = `The Date of this Statistics (${newDate})`;
 
   let countryData = covidData.find(
     d =>
