@@ -1,57 +1,95 @@
-// Gets All global cases
+const countryInput = document.querySelector('.form-control'),
+  showData = document.getElementById('show__statistics'),
+  showDate = document.getElementById('Date'),
+  failMessage = document.getElementById('message'),
+  searchInput = document.getElementById('search'),
+  refreshResultBtn = document.getElementById('refreshResultBtn');
 
-let allCaseNo = document.getElementById("allCaseNo");
-let recoveredCaseNo = document.getElementById("recoveredCaseNo");
-let deathCaseNo = document.getElementById("deathCaseNo");
+var covidData = JSON.parse(localStorage.getItem('covidData'));
+var covidSummary = JSON.parse(localStorage.getItem('covidSummary'));
 
-let covidChart = document.getElementById("covidCasesChart").getContext("2d");
+window.onload = getData(false, function(name) {
+  console.log(`got ${name}`);
+});
 
-(async () => {
-	let data = await fetch("https://corona.lmao.ninja/all");
+function getData(force, cb) {
+  if (covidSummary) {
+    showDate.textContent = `The Date of this Statistics (${new Date(
+      covidSummary['Date']
+    ).toLocaleDateString()})`;
+  }
+  if (!covidData || force) {
+    fetch('https://corona.lmao.ninja/countries')
+      .then(response => response.json())
+      .then(data => {
+        covidData = data;
+        localStorage.setItem('covidData', JSON.stringify(data));
+        cb('covid data');
+      });
+  }
+  if (!covidSummary || force) {
+    fetch('https://api.covid19api.com/summary')
+      .then(response => response.json())
+      .then(data => {
+        covidSummary = data;
+        localStorage.setItem('covidSummary', JSON.stringify(data));
+        const date = data['Date'];
+        const newDate = date.slice(0, 10);
+        showDate.textContent = `The Date of this Statistics (${newDate})`;
+        cb('covid summary');
+      });
+  }
+}
 
-	let all = await data.json();
+refreshResultBtn.addEventListener('click', e => {
+  getData(true, function(name) {
+    showDate.textContent = `Updated Date of this Statistics (${new Date(
+      covidSummary['Date']
+    ).toLocaleDateString()})`;
+    console.log('Got data for', name);
+  });
+});
 
-	let allCases = all.cases;
-	let allDeaths = all.deaths;
-	let allRecovered = all.recovered;
+searchInput.addEventListener('click', e => {
+  e.preventDefault();
+  if (!covidData) {
+    failMessage.innerHTML = 'No data. Please try again.';
+  }
+  failMessage.innerHTML = '';
+  const countryName = countryInput.value;
 
-	allCaseNo.innerText = allCases;
-	recoveredCaseNo.innerText = allRecovered;
-	deathCaseNo.innerText = allDeaths;
-
-	//Covid Chart
-	let donut = new Chart(covidChart, {
-		// The type of chart we want to create
-		type: "doughnut",
-
-		// The data for our dataset
-		data: {
-			labels: ["All Cases", "Recovered Cases", "Death Cases"],
-			datasets: [
-				{
-					label: "Covid-19 Cases",
-					borderColor: "rgba(0,0,0)",
-					backgroundColor: [
-						"rgba(136,136,136,1)",
-						"rgba(0,255,0,1)",
-						"rgba(255,0,0,1)"
-					],
-					data: [allCases, allRecovered, allDeaths]
-				}
-			]
-		},
-		options: {
-			//changing legends styles
-			legend: {
-				labels: {
-					fontSize: 25,
-					padding: 50
-				}
-			},
-			//tooltips styles
-			tooltips: {
-				bodyFontSize: 30
-			}
-		}
-	});
-})();
+  let countryData = covidData.find(
+    d =>
+      d.country.toLowerCase() === countryName.toLowerCase() ||
+      d.countryInfo.iso2 === countryName.toUpperCase()
+  );
+  if (countryData) {
+    showData.innerHTML = `<tr>
+                                <td><img style= width = '30px' ; height = '30px' src="${
+                                  countryData.countryInfo.flag
+                                }"/></td>
+                                <td>${countryData.country}</td>
+                                <td>${countryData.cases.toLocaleString(
+                                  'en'
+                                )}</td>
+                                <td>${countryData.todayCases.toLocaleString(
+                                  'en'
+                                )}</td>
+                                <td>${countryData.todayDeaths.toLocaleString(
+                                  'en'
+                                )}</td>
+                                <td style="color: #F48FB1;">${countryData.deaths.toLocaleString(
+                                  'en'
+                                )}</td>
+                                <td>${countryData.active.toLocaleString(
+                                  'en'
+                                )}</td>
+                                <td>${countryData.recovered.toLocaleString(
+                                  'en'
+                                )}</td>
+                            </tr>${showData.innerHTML}`;
+  } else {
+    failMessage.innerHTML = `Failed to find data for: ${countryName}`;
+  }
+  countryInput.value = '';
+});
